@@ -9,10 +9,11 @@ from kimi_cli.agent import Agent, AgentGlobals, AgentSpec, load_agent
 from kimi_cli.soul import MaxStepsReached
 from kimi_cli.soul.context import Context
 from kimi_cli.soul.kimisoul import KimiSoul
-from kimi_cli.soul.wire import ApprovalRequest, Wire, WireMessage, get_wire_or_none
 from kimi_cli.tools.utils import load_desc
 from kimi_cli.utils.message import message_extract_text
 from kimi_cli.utils.path import next_available_rotation
+from kimi_cli.wire import WireUISide, get_wire_or_none
+from kimi_cli.wire.message import ApprovalRequest, WireMessage
 
 # Maximum continuation attempts for task summary
 MAX_CONTINUE_ATTEMPTS = 1
@@ -156,8 +157,8 @@ class Task(CallableTool2[Params]):
         return ToolOk(output=final_response)
 
 
-class _SubWire(Wire):
-    def __init__(self, super_wire: Wire):
+class _SubWire(WireUISide):
+    def __init__(self, super_wire: WireUISide):
         super().__init__()
         self._super_wire = super_wire
 
