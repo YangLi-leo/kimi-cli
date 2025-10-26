@@ -1,13 +1,16 @@
 import asyncio
 import json
 import sys
+from collections.abc import Callable
 from pathlib import Path
+from typing import Any
 
 import click
 
-from kimi_cli import UIMode, __version__, kimi_run
-from kimi_cli.agent import DEFAULT_AGENT_FILE
+from kimi_cli import UIMode, kimi_run
+from kimi_cli.agentspec import DEFAULT_AGENT_FILE
 from kimi_cli.config import ConfigError, load_config
+from kimi_cli.constant import VERSION
 from kimi_cli.metadata import continue_session, new_session
 from kimi_cli.share import get_share_dir
 from kimi_cli.ui.print import InputFormat, OutputFormat
@@ -21,7 +24,7 @@ class Reload(Exception):
 
 
 @click.command(context_settings=dict(help_option_names=["-h", "--help"]))
-@click.version_option(__version__)
+@click.version_option(VERSION)
 @click.option(
     "--verbose",
     is_flag=True,
@@ -84,7 +87,7 @@ class Reload(Exception):
     "--print",
     "ui",
     flag_value="print",
-    help="Run in print mode. Shortcut for `--ui print`.",
+    help="Run in print mode. Shortcut for `--ui print`. Note: print mode implicitly adds `--yolo`.",
 )
 @click.option(
     "--acp",
@@ -152,7 +155,11 @@ def kimi(
     yolo: bool,
 ):
     """Kimi, your next CLI agent."""
-    echo = click.echo if verbose else lambda *args, **kwargs: None
+
+    def _noop_echo(*args: Any, **kwargs: Any):
+        pass
+
+    echo: Callable[..., None] = click.echo if verbose else _noop_echo
 
     logger.add(
         get_share_dir() / "logs" / "kimi.log",
